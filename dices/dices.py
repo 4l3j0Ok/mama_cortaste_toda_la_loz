@@ -1,48 +1,46 @@
-from enum import Enum
 import os
+import random
 
 
-class Dices:
-    txts_path = "./dices"
+class Dice:
+    txts_path = os.path.dirname(os.path.abspath(__file__)) + os.sep + "ascii"
 
     def __init__(self) -> None:
         pass
 
-    def get_dices(self, file_name):
+    def get_dices_from_txt(self, file_name) -> dict:
         file_path = self.txts_path + os.sep + file_name
+        dices = {}
         with open(file_path, "r") as file:
             lines = file.readlines()
             number = None
             for line in lines:
-                if line.strip().isnumeric():
+                if line.strip().isnumeric() or "3D" in line.strip():
                     number = line.strip()
-                    setattr(self, number, "")
+                    dices[number] = ""
                     continue
                 if number:
-                    setattr(self, number, getattr(self, number) + line)
+                    dices[number] = dices[number] + line
+        return dices
 
 
-class D6(Dices):
+class D6(Dice):
     file_name = "d6.txt"
 
     def __init__(self) -> None:
         super().__init__()
-        super().get_dices(self.file_name)
-        self.__set_dices()
+        dices = super().get_dices_from_txt(self.file_name)
+        self.__set_dices(dices)
 
-    def __set_dices(self):
-        self.one = self.__getattribute__("1")
-        self.__delattr__("1")
-        self.two = self.__getattribute__("2")
-        self.__delattr__("2")
-        self.three = self.__getattribute__("3")
-        self.__delattr__("3")
-        self.four = self.__getattribute__("4")
-        self.__delattr__("4")
-        self.five = self.__getattribute__("5")
-        self.__delattr__("5")
-        self.six = self.__getattribute__("6")
-        self.__delattr__("6")
+    def __set_dices(self, dices) -> None:
+        self.one = dices.get("1")
+        self.two = dices.get("2")
+        self.three = dices.get("3")
+        self.four = dices.get("4")
+        self.five = dices.get("5")
+        self.six = dices.get("6")
+        self.three_d = dices.get("3D1")
+        self.three_d_alt = dices.get("3D2")
 
-
-print(D6().__dict__)
+    def roll(self) -> str:
+        return random.choice([self.one, self.two, self.three, self.four, self.five, self.six])
